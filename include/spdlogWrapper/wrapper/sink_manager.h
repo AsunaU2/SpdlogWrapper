@@ -44,9 +44,9 @@ class ISinkManager {
   spdlog::level::level_enum level_ = spdlog::level::info;
 };
 
-class CStdoutColorSink : public ISinkManager {
+class CStdoutColorSinkManager : public ISinkManager {
  public:
-  CStdoutColorSink() {
+  CStdoutColorSinkManager() {
 	try {
 	  sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 	} catch (const spdlog::spdlog_ex& ex) {
@@ -56,7 +56,7 @@ class CStdoutColorSink : public ISinkManager {
 	sink_->set_pattern(pattern_);
 	sink_->set_level(level_);
   }
-  explicit CStdoutColorSink(spdlog::level::level_enum level, const std::string& pattern = "") : CStdoutColorSink() {
+  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string& pattern = "") : CStdoutColorSinkManager() {
 	sink_->set_level(level);
 	if (!pattern.empty()) {
 		sink_->set_pattern(pattern);
