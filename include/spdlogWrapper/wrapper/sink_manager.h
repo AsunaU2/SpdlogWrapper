@@ -24,15 +24,22 @@ enum class SinkType {
   SINK_TYPE_ONCE_FILE
 };
 
+struct SinkInfo {
+  SinkType type;
+
+};
+
 class ISinkManager {
  public:
-  ISinkManager()  = default;
+  ISinkManager() = default;
   virtual ~ISinkManager() = default;
 
-  ISinkManager(const ISinkManager&) = delete;
-  ISinkManager& operator=(const ISinkManager&) = delete;
-  ISinkManager(ISinkManager&&) = delete;
-  ISinkManager& operator=(ISinkManager&&) = delete;
+  ISinkManager(const ISinkManager &) = delete;
+  ISinkManager &operator=(const ISinkManager &) = delete;
+  ISinkManager(ISinkManager &&) = delete;
+  ISinkManager &operator=(ISinkManager &&) = delete;
+
+  virtual spdlog::sink_ptr CreateSink() = 0;
 
   spdlog::sink_ptr Sink() {
 	return sink_;
@@ -44,32 +51,55 @@ class ISinkManager {
   spdlog::level::level_enum level_ = spdlog::level::info;
 };
 
+// sink of stdout type
 class CStdoutColorSinkManager : public ISinkManager {
  public:
   CStdoutColorSinkManager() {
-	try {
-	  sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-	} catch (const spdlog::spdlog_ex& ex) {
-	  std::cerr << ex.what() << std::endl;
-	}
 
 	sink_->set_pattern(pattern_);
 	sink_->set_level(level_);
   }
-  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string& pattern = "") : CStdoutColorSinkManager() {
+  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string &pattern = "") : CStdoutColorSinkManager() {
 	sink_->set_level(level);
 	if (!pattern.empty()) {
-		sink_->set_pattern(pattern);
+	  sink_->set_pattern(pattern);
+	}
+  }
+
+  spdlog::sink_ptr CreateSink() override {
+	try {
+	  sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	  return sink_;
+	} catch (const spdlog::spdlog_ex &ex) {
+	  std::cerr << ex.what() << std::endl;
 	}
   }
 };
 
-class AbstractSinksManager {
-	AbstractSinksManager() {
+class CSinksManagerFactory {
+ public:
+  explicit CSinksManagerFactory(SinkType eType = SinkType::SINK_TYPE_ONCE_FILE)
+	  : sinkType_(eType) {}
 
+  std::shared_ptr<ISinkManager> CreateSinkManager() {
+	switch (sinkType_) {
+	  case SinkType::SINK_TYPE_STDOUT: {
+		return std::make_shared<CStdoutColorSinkManager>()
+	  }
+		break;
 	}
+  }
 
-	virtual ~AbstractSinksManager(){}
+ private:
+  SinkType sinkType_;
+};
+
+class AbstractSinksManager {
+  AbstractSinksManager() {
+
+  }
+
+  virtual ~AbstractSinksManager() {}
 
  protected:
   std::vector<spdlog::sink_ptr> sinks_;
