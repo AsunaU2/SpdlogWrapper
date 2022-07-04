@@ -5,16 +5,16 @@
 #ifndef SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
 #define SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
 
-#include "../spdlog/spdlog.h"
-#include "../spdlog/sinks/basic_file_sink.h"
-#include "../spdlog/sinks/rotating_file_sink.h"
-#include "../spdlog/sinks/daily_file_sink.h"
-#include "../spdlog/sinks/stdout_color_sinks.h"
-#include "../spdlog/common.h"
-#include "../spdlog/async.h"
-#include "../nlohmannJson/json.hpp"
-
 #include <iostream>
+
+#include "../nlohmannJson/json.hpp"
+#include "../spdlog/async.h"
+#include "../spdlog/common.h"
+#include "../spdlog/sinks/basic_file_sink.h"
+#include "../spdlog/sinks/daily_file_sink.h"
+#include "../spdlog/sinks/rotating_file_sink.h"
+#include "../spdlog/sinks/stdout_color_sinks.h"
+#include "../spdlog/spdlog.h"
 
 enum class SinkType {
   SINK_TYPE_BASIC,
@@ -44,9 +44,7 @@ class ISinkManager {
 
   virtual spdlog::sink_ptr CreateSink() = 0;
 
-  spdlog::sink_ptr Sink() {
-	return sink_;
-  }
+  spdlog::sink_ptr Sink() { return sink_; }
 
  protected:
   spdlog::sink_ptr sink_;
@@ -58,23 +56,25 @@ class ISinkManager {
 class CStdoutColorSinkManager : public ISinkManager {
  public:
   CStdoutColorSinkManager() {
-	sink_->set_pattern(pattern_);
-	sink_->set_level(level_);
+    sink_->set_pattern(pattern_);
+    sink_->set_level(level_);
   }
-  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string &pattern = "") : CStdoutColorSinkManager() {
-	sink_->set_level(level);
-	if (!pattern.empty()) {
-	  sink_->set_pattern(pattern);
-	}
+  explicit CStdoutColorSinkManager(spdlog::level::level_enum level,
+                                   const std::string &pattern = "")
+      : CStdoutColorSinkManager() {
+    sink_->set_level(level);
+    if (!pattern.empty()) {
+      sink_->set_pattern(pattern);
+    }
   }
 
   spdlog::sink_ptr CreateSink() override {
-	try {
-	  sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-	  return sink_;
-	} catch (const spdlog::spdlog_ex &ex) {
-	  std::cerr << ex.what() << std::endl;
-	}
+    try {
+      sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+      return sink_;
+    } catch (const spdlog::spdlog_ex &ex) {
+      std::cerr << ex.what() << std::endl;
+    }
   }
 };
 
@@ -84,13 +84,15 @@ class CSinksManager {
   CSinksManager &operator=(const CSinksManager &) = delete;
 
   static CSinksManager &GetInstance() {
-	static CSinksManager inst;
-	return inst;
+    static CSinksManager inst;
+    return inst;
   }
 
  private:
   CSinksManager() = default;
 
+ private:
+  std::vector<spdlog::sink_ptr> sinks_;
 };
 
-#endif //SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
+#endif  // SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
