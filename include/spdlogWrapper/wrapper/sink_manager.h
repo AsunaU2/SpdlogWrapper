@@ -25,21 +25,21 @@ enum class SinkType {
 };
 
 struct SinkInfo {
-  SinkType type;
+  SinkType    type;
   std::string level;
   std::string path;
-  int rotate_count;
-  uint64_t rotate_size;
+  int         rotate_count;
+  uint64_t    rotate_size;
 };
 
 class ISinkManager {
  public:
-  ISinkManager() = default;
+  ISinkManager()          = default;
   virtual ~ISinkManager() = default;
 
   ISinkManager(const ISinkManager &) = delete;
   ISinkManager &operator=(const ISinkManager &) = delete;
-  ISinkManager(ISinkManager &&) = delete;
+  ISinkManager(ISinkManager &&)                 = delete;
   ISinkManager &operator=(ISinkManager &&) = delete;
 
   virtual spdlog::sink_ptr CreateSink() = 0;
@@ -47,9 +47,9 @@ class ISinkManager {
   spdlog::sink_ptr Sink() { return sink_; }
 
  protected:
-  spdlog::sink_ptr sink_;
-  std::string pattern_ = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
-  spdlog::level::level_enum level_ = spdlog::level::info;
+  spdlog::sink_ptr          sink_;
+  std::string               pattern_ = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
+  spdlog::level::level_enum level_   = spdlog::level::info;
 };
 
 // sink of stdout type
@@ -59,9 +59,7 @@ class CStdoutColorSinkManager : public ISinkManager {
     sink_->set_pattern(pattern_);
     sink_->set_level(level_);
   }
-  explicit CStdoutColorSinkManager(spdlog::level::level_enum level,
-                                   const std::string &pattern = "")
-      : CStdoutColorSinkManager() {
+  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string &pattern = "") : CStdoutColorSinkManager() {
     sink_->set_level(level);
     if (!pattern.empty()) {
       sink_->set_pattern(pattern);
