@@ -26,7 +26,10 @@ enum class SinkType {
 
 struct SinkInfo {
   SinkType type;
-
+  std::string level;
+  std::string path;
+  int rotate_count;
+  uint64_t rotate_size;
 };
 
 class ISinkManager {
@@ -55,7 +58,6 @@ class ISinkManager {
 class CStdoutColorSinkManager : public ISinkManager {
  public:
   CStdoutColorSinkManager() {
-
 	sink_->set_pattern(pattern_);
 	sink_->set_level(level_);
   }
@@ -76,33 +78,19 @@ class CStdoutColorSinkManager : public ISinkManager {
   }
 };
 
-class CSinksManagerFactory {
+class CSinksManager {
  public:
-  explicit CSinksManagerFactory(SinkType eType = SinkType::SINK_TYPE_ONCE_FILE)
-	  : sinkType_(eType) {}
+  CSinksManager(const CSinksManager &) = delete;
+  CSinksManager &operator=(const CSinksManager &) = delete;
 
-  std::shared_ptr<ISinkManager> CreateSinkManager() {
-	switch (sinkType_) {
-	  case SinkType::SINK_TYPE_STDOUT: {
-		return std::make_shared<CStdoutColorSinkManager>()
-	  }
-		break;
-	}
+  static CSinksManager &GetInstance() {
+	static CSinksManager inst;
+	return inst;
   }
 
  private:
-  SinkType sinkType_;
-};
+  CSinksManager() = default;
 
-class AbstractSinksManager {
-  AbstractSinksManager() {
-
-  }
-
-  virtual ~AbstractSinksManager() {}
-
- protected:
-  std::vector<spdlog::sink_ptr> sinks_;
 };
 
 #endif //SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
