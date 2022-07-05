@@ -16,6 +16,10 @@
 #include "../spdlog/sinks/stdout_color_sinks.h"
 #include "../spdlog/spdlog.h"
 
+namespace spdlogsink {
+
+using spd_level = spdlog::level::level_enum;
+
 enum class SinkType {
   SINK_TYPE_BASIC,
   SINK_TYPE_ROTATING,
@@ -25,11 +29,12 @@ enum class SinkType {
 };
 
 struct SinkInfo {
-  SinkType    type;
-  std::string level;
-  std::string path;
-  int         rotate_count;
-  uint64_t    rotate_size;
+  SinkType    type         = SinkType::SINK_TYPE_ONCE_FILE;
+  spd_level   level        = spdlog::level::info;
+  std::string path         = "./logs";
+  int         rotate_count = 1;
+  uint64_t    rotate_size  = 1024 * 1024 * 1;
+  std::string pattern      = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
 };
 
 class ISinkManager {
@@ -43,40 +48,27 @@ class ISinkManager {
   ISinkManager &operator=(ISinkManager &&) = delete;
 
   virtual spdlog::sink_ptr CreateSink() = 0;
-
-  spdlog::sink_ptr Sink() { return sink_; }
-
- protected:
-  spdlog::sink_ptr          sink_;
-  std::string               pattern_ = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
-  spdlog::level::level_enum level_   = spdlog::level::info;
 };
 
 // sink of stdout type
 class CStdoutColorSinkManager : public ISinkManager {
  public:
-  CStdoutColorSinkManager() {
-    sink_->set_pattern(pattern_);
-    sink_->set_level(level_);
-  }
-  explicit CStdoutColorSinkManager(spdlog::level::level_enum level, const std::string &pattern = "") : CStdoutColorSinkManager() {
-    sink_->set_level(level);
-    if (!pattern.empty()) {
-      sink_->set_pattern(pattern);
-    }
-  }
+  CStdoutColorSinkManager() = default;
 
   spdlog::sink_ptr CreateSink() override {
     try {
-      sink_ = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-      return sink_;
+      auto sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+      return sink;
     } catch (const spdlog::spdlog_ex &ex) {
       std::cerr << ex.what() << std::endl;
+      throw;
     }
   }
 };
 
 class CSinksManager {
+  using sink_weak_ptr = std::weak_ptr<spdlog::sinks::sink>;
+
  public:
   CSinksManager(const CSinksManager &) = delete;
   CSinksManager &operator=(const CSinksManager &) = delete;
@@ -86,11 +78,30 @@ class CSinksManager {
     return inst;
   }
 
+  void CreateSink(const SinkInfo &info) {
+    spdlog::sink_ptr tmpSink;
+    switch (info.type) {
+      case SinkType::SINK_TYPE_BASIC: {
+      } break;
+      case SinkType::SINK_TYPE_ROTATING: {
+      } break;
+      case SinkType::SINK_TYPE_DAILY: {
+      } break;
+      case SinkType::SINK_TYPE_STDOUT: {
+        tmpSink = CStdoutColorSinkManager();
+      } break;
+      case SinkType::SINK_TYPE_ONCE_FILE: {
+      } break;
+      default:
+        break;
+    }
+  }
+
  private:
   CSinksManager() = default;
 
  private:
-  std::vector<spdlog::sink_ptr> sinks_;
+  std::vector<sink_weak_ptr> sinks_;
 };
-
+}  // namespace spdlogsink
 #endif  // SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
