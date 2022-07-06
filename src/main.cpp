@@ -1,12 +1,15 @@
 #include <iostream>
+
 #include "sink_manager.h"
 
-int main() {
+using namespace spdlogsink;
 
-  CStdoutColorSinkManager st {spdlog::level::debug, ""};
-  std::vector<spdlog::sink_ptr> m_sinks;
-  m_sinks.push_back(st.Sink());
-  std::shared_ptr<spdlog::logger> logger1 = std::make_shared<spdlog::logger>("multiple log", begin( m_sinks ), end( m_sinks ));
+int main() {
+  SinkInfo sf;
+  sf.type = SinkType::SINK_TYPE_STDOUT;
+  CSinksManager::GetInstance().CreateSink(sf);
+
+  std::shared_ptr<spdlog::logger> logger1 = std::make_shared<spdlog::logger>("multiple log", begin(CSinksManager::GetInstance().Sinks()), end(CSinksManager::GetInstance().Sinks()));
 
   logger1->set_level(spdlog::level::trace);
   logger1->debug("xixixixi");
