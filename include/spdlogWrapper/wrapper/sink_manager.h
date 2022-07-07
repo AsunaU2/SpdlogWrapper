@@ -30,12 +30,12 @@ enum class SinkType {
 };
 
 struct SinkInfo {
-  SinkType type        = SinkType::SINK_TYPE_ONCE_FILE;
-  spd_level level      = spdlog::level::info;
-  std::string path     = "./logs";
-  int rotate_count     = 1;
-  uint64_t rotate_size = 1024 * 1024 * 1;
-  std::string pattern  = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
+  SinkType type            = SinkType::SINK_TYPE_ONCE_FILE;
+  spd_level level          = spdlog::level::info;
+  std::string path         = "./logs";
+  std::size_t rotate_count = 1;
+  std::size_t rotate_size  = 1024 * 1024 * 1;
+  std::string pattern      = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
 };
 
 class ISinkManager {
@@ -63,7 +63,58 @@ class ISinkManager {
   spdlog::sink_ptr sink_;
 };
 
-// sink of stdout type
+class CBasicSinkManager : public ISinkManager {
+ public:
+  CBasicSinkManager(const std::string &filePath) : filePath_{filePath} {}
+
+  bool CreateSink() override {
+    try {
+      sink_ = std::make_shared<spdlog::sinks::basic_file_sink_mt>(filePath_);
+      return true;
+    } catch (const spdlog::spdlog_ex &ex) {
+      std::cerr << ex.what() << std::endl;
+      return false;
+    }
+  }
+
+ private:
+  std::string filePath_;
+};
+
+class CRotatingSinkManager : public ISinkManager {
+ public:
+  CRotatingSinkManager(const std::string &filePath, std::size_t singleFileSize, std::size_t rotatingCounts) : filePath_{filePath}, singleFileSize_{singleFileSize}, rotatingCounts_{rotatingCounts} {}
+
+  bool CreateSink() override {
+    try {
+      sink_ = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(filePath_, singleFileSize_, rotatingCounts_);
+      return true;
+    } catch (const spdlog::spdlog_ex &ex) {
+      std::cerr << ex.what() << std::endl;
+      return false;
+    }
+  }
+
+ private:
+  std::string filePath_;
+  std::size_t singleFileSize_ = 0;
+  std::size_t rotatingCounts_ = 1;
+};
+
+class CDailySinkManager : public ISinkManager {
+ public:
+  CDailySinkManager() = default;
+
+  bool CreateSink() override {
+    try {
+      sink_ = std::make_shared<spdlog::sinks::daily_file_sink_mt>();
+    } catch (const spdlog::spdlog_ex &ex) {
+      std::cerr << ex.what() << std::endl;
+      return false;
+    }
+  }
+};
+
 class CStdoutColorSinkManager : public ISinkManager {
  public:
   CStdoutColorSinkManager() = default;
@@ -108,12 +159,12 @@ class CSinksManager {
       case SinkType::SINK_TYPE_BASIC: {
       } break;
       case SinkType::SINK_TYPE_ROTATING: {
+        sinkManager = std::make_shared<CRotatingSinkManager>(info.path, info.rotate_size, info.rotate_count);
       } break;
       case SinkType::SINK_TYPE_DAILY: {
       } break;
       case SinkType::SINK_TYPE_STDOUT: {
-        sinkManager         = std::make_shared<CStdoutColorSinkManager>();
-        isSinkCreateSucceed = sinkManager->CreateSink();
+        sinkManager = std::make_shared<CStdoutColorSinkManager>();
       } break;
       case SinkType::SINK_TYPE_ONCE_FILE: {
       } break;
@@ -121,11 +172,7 @@ class CSinksManager {
         break;
     }
 
-    if (!isSinkCreateSucceed) {
-      sinkManager.reset();
-    }
-
-    if (sinkManager) {
+    if (sinkManager && sinkManager->CreateSink()) {
       sinkManager->SetOutputInfo(info);
       sinks_.emplace_back(sinkManager->Sink());
     }
