@@ -5,6 +5,7 @@
 #ifndef SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
 #define SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_SINK_MANAGER_H_
 
+#include <initializer_list>
 #include <iostream>
 
 #include "../nlohmannJson/json.hpp"
@@ -90,7 +91,16 @@ class CSinksManager {
     return inst;
   }
 
-  void CreateSink(const SinkInfo &info) {
+  void CreateSinks(std::initializer_list<SinkInfo> infoList) {
+    for (const auto &it : infoList) {
+      createSink(it);
+    }
+  }
+
+  const std::vector<spdlog::sink_ptr> &Sinks() const { return sinks_; }
+
+ private:
+  void createSink(const SinkInfo &info) {
     std::shared_ptr<ISinkManager> sinkManager;
     bool isSinkCreateSucceed = false;
 
@@ -120,8 +130,6 @@ class CSinksManager {
       sinks_.emplace_back(sinkManager->Sink());
     }
   }
-
-  const std::vector<spdlog::sink_ptr> &Sinks() const { return sinks_; }
 
  private:
   CSinksManager() = default;

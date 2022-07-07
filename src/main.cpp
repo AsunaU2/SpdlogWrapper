@@ -7,7 +7,7 @@ using namespace spdlogsink;
 int main() {
   SinkInfo sf;
   sf.type = SinkType::SINK_TYPE_STDOUT;
-  CSinksManager::GetInstance().CreateSink(sf);
+  CSinksManager::GetInstance().CreateSinks({sf});
 
   std::shared_ptr<spdlog::logger> logger1 = std::make_shared<spdlog::logger>("multiple log", begin(CSinksManager::GetInstance().Sinks()), end(CSinksManager::GetInstance().Sinks()));
 
