@@ -7,6 +7,7 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <utility>
 
 #include "../nlohmannJson/json.hpp"
 #include "../spdlog/async.h"
@@ -30,23 +31,23 @@ enum class SinkType {
 };
 
 struct SinkInfo {
-  SinkType type            = SinkType::SINK_TYPE_ONCE_FILE;
-  spd_level level          = spdlog::level::info;
-  std::string path         = "./logs";
+  SinkType type = SinkType::SINK_TYPE_ONCE_FILE;
+  spd_level level = spdlog::level::info;
+  std::string path = "./logs";
   std::size_t rotate_count = 1;
-  std::size_t rotate_size  = 1024 * 1024 * 1;
-  std::string pattern      = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
+  std::size_t rotate_size = 1024 * 1024 * 1;
+  std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
 };
 
-class ISinkManager {
+class ISinkFactory {
  public:
-  ISinkManager() = default;
+  ISinkFactory() = default;
 
-  virtual ~ISinkManager()                       = default;
-  ISinkManager(const ISinkManager &)            = delete;
-  ISinkManager &operator=(const ISinkManager &) = delete;
-  ISinkManager(ISinkManager &&)                 = delete;
-  ISinkManager &operator=(ISinkManager &&)      = delete;
+  virtual ~ISinkFactory() = default;
+  ISinkFactory(const ISinkFactory &) = delete;
+  ISinkFactory &operator=(const ISinkFactory &) = delete;
+  ISinkFactory(ISinkFactory &&) = delete;
+  ISinkFactory &operator=(ISinkFactory &&) = delete;
 
   virtual bool CreateSink() = 0;
 
@@ -63,9 +64,10 @@ class ISinkManager {
   spdlog::sink_ptr sink_;
 };
 
-class CBasicSinkManager : public ISinkManager {
+class CBasicSinkFactory : public ISinkFactory {
  public:
-  CBasicSinkManager(const std::string &filePath) : filePath_{filePath} {}
+  explicit CBasicSinkFactory(std::string filePath)
+      : filePath_{std::move(filePath)} {}
 
   bool CreateSink() override {
     try {
@@ -81,9 +83,12 @@ class CBasicSinkManager : public ISinkManager {
   std::string filePath_;
 };
 
-class CRotatingSinkManager : public ISinkManager {
+class CRotatingSinkFactory : public ISinkFactory {
  public:
-  CRotatingSinkManager(const std::string &filePath, std::size_t singleFileSize, std::size_t rotatingCounts) : filePath_{filePath}, singleFileSize_{singleFileSize}, rotatingCounts_{rotatingCounts} {}
+  CRotatingSinkFactory(std::string filePath, std::size_t singleFileSize, std::size_t rotatingCounts)
+      : filePath_(std::move(filePath))
+      , singleFileSize_(singleFileSize)
+      , rotatingCounts_(rotatingCounts) {}
 
   bool CreateSink() override {
     try {
@@ -101,23 +106,32 @@ class CRotatingSinkManager : public ISinkManager {
   std::size_t rotatingCounts_ = 1;
 };
 
-class CDailySinkManager : public ISinkManager {
+class CDailySinkFactory : public ISinkFactory {
  public:
-  CDailySinkManager() = default;
+  CDailySinkFactory(std::string filePath, int hours, int minutes)
+      : filePath_(std::move(filePath))
+      , hours_(hours)
+      , minutes_(minutes) {}
 
   bool CreateSink() override {
     try {
-      sink_ = std::make_shared<spdlog::sinks::daily_file_sink_mt>();
+      sink_ = std::make_shared<spdlog::sinks::daily_file_sink_mt>(filePath_, hours_, minutes_);
+      return true;
     } catch (const spdlog::spdlog_ex &ex) {
       std::cerr << ex.what() << std::endl;
       return false;
     }
   }
+
+ private:
+  std::string filePath_;
+  int hours_ = 0;
+  int minutes_ = 0;
 };
 
-class CStdoutColorSinkManager : public ISinkManager {
+class CStdoutColorSinkFactory : public ISinkFactory {
  public:
-  CStdoutColorSinkManager() = default;
+  CStdoutColorSinkFactory() = default;
 
   bool CreateSink() override {
     try {
@@ -131,10 +145,8 @@ class CStdoutColorSinkManager : public ISinkManager {
 };
 
 class CSinksManager {
-  using sink_weak_ptr = std::weak_ptr<spdlog::sinks::sink>;
-
  public:
-  CSinksManager(const CSinksManager &)            = delete;
+  CSinksManager(const CSinksManager &) = delete;
   CSinksManager &operator=(const CSinksManager &) = delete;
 
   static CSinksManager &GetInstance() {
@@ -152,19 +164,20 @@ class CSinksManager {
 
  private:
   void createSink(const SinkInfo &info) {
-    std::shared_ptr<ISinkManager> sinkManager;
-    bool isSinkCreateSucceed = false;
+    std::shared_ptr<ISinkFactory> sinkFactory;
 
     switch (info.type) {
       case SinkType::SINK_TYPE_BASIC: {
+        sinkFactory = std::make_shared<CBasicSinkFactory>(info.path);
       } break;
       case SinkType::SINK_TYPE_ROTATING: {
-        sinkManager = std::make_shared<CRotatingSinkManager>(info.path, info.rotate_size, info.rotate_count);
+        sinkFactory = std::make_shared<CRotatingSinkFactory>(info.path, info.rotate_size, info.rotate_count);
       } break;
       case SinkType::SINK_TYPE_DAILY: {
+        sinkFactory = std::make_shared<CDailySinkFactory>(info.path, 8, 0);
       } break;
       case SinkType::SINK_TYPE_STDOUT: {
-        sinkManager = std::make_shared<CStdoutColorSinkManager>();
+        sinkFactory = std::make_shared<CStdoutColorSinkFactory>();
       } break;
       case SinkType::SINK_TYPE_ONCE_FILE: {
       } break;
@@ -172,9 +185,9 @@ class CSinksManager {
         break;
     }
 
-    if (sinkManager && sinkManager->CreateSink()) {
-      sinkManager->SetOutputInfo(info);
-      sinks_.emplace_back(sinkManager->Sink());
+    if (sinkFactory && sinkFactory->CreateSink()) {
+      sinkFactory->SetOutputInfo(info);
+      sinks_.emplace_back(sinkFactory->Sink());
     }
   }
 
