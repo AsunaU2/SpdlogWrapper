@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.21)
 project(spdlogWrapper)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_BUILD_TYPE Debug)
 
 include_directories(
         include/
@@ -10,4 +11,4 @@ include_directories(
         include/spdlogWrapper/spdlog/
 )
 
-add_executable(spdlogWrapper src/main.cpp include/spdlogWrapper/wrapper/spdlog-api.h include/spdlogWrapper/wrapper/sink_manager.h)
+add_executable(spdlogWrapper include/spdlogWrapper/wrapper/spdlog-api.h include/spdlogWrapper/wrapper/sink_manager.h src/main.cpp)

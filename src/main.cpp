@@ -5,6 +5,8 @@
 using namespace spdlogsink;
 
 int main() {
+  auto s = GetCurrentTime();
+
   SinkInfo sf;
   std::string pattern = sf.sink_pattern;
   sf.sink_type = SinkType::SINK_TYPE_STDOUT;
@@ -20,6 +22,6 @@ int main() {
   logger1->set_level(spdlog::level::trace);
   logger1->debug("xixixixi");
   logger1->info("xixixixi");
-  std::cout << "Hello, World!" << std::endl;
+  std::cout << "Hello, World2!" << std::endl;
   return 0;
 }

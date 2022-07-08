@@ -153,6 +153,38 @@ class CStdoutColorSinkFactory : public ISinkFactory {
   }
 };
 
+std::string GetCurrentTime() {
+  std::string strTime;
+  std::time_t now = std::time(nullptr);
+  std::tm p{};
+#ifdef _WIN32
+  localtime_s(&p, &now);
+#else
+  localtime_r(&now, &p);
+#endif  // _WIN32
+
+  std::string year = std::to_string(1900 + p.tm_year);
+  std::string month = std::to_string(1 + p.tm_mon);
+  std::string day = std::to_string(p.tm_mday);
+  std::string hour = std::to_string(p.tm_hour);
+  std::string minute = std::to_string(p.tm_min);
+  std::string second = std::to_string(p.tm_sec);
+
+  strTime.append(year);
+  strTime.append("-");
+  strTime.append(month);
+  strTime.append("-");
+  strTime.append(day);
+  strTime.append("-");
+  strTime.append(hour);
+  strTime.append("-");
+  strTime.append(minute);
+  strTime.append("-");
+  strTime.append(second);
+
+  return strTime;
+}
+
 class CSinksManager {
  public:
   CSinksManager(const CSinksManager &) = delete;
