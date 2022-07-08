@@ -31,12 +31,21 @@ enum class SinkType {
 };
 
 struct SinkInfo {
-  SinkType type = SinkType::SINK_TYPE_ONCE_FILE;
-  spd_level level = spdlog::level::info;
-  std::string path = "./logs";
-  std::size_t rotate_count = 1;
-  std::size_t rotate_size = 1024 * 1024 * 1;
-  std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v";
+  SinkInfo(SinkType type = SinkType::SINK_TYPE_ONCE_FILE, std::string path = "./logs/log.log", spd_level level = spdlog::level::info, std::size_t rotateCount = 1,
+           std::size_t rotateSize = 1024 * 1024 * 1, std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v")
+      : sink_type(type)
+      , file_path(std::move(path))
+      , sink_level(level)
+      , rotate_count(rotateCount)
+      , rotate_size(rotateSize)
+      , sink_pattern(std::move(pattern)) {}
+
+  SinkType sink_type;
+  spd_level sink_level;
+  std::string file_path;
+  std::size_t rotate_count;
+  std::size_t rotate_size;
+  std::string sink_pattern;
 };
 
 class ISinkFactory {
@@ -55,8 +64,8 @@ class ISinkFactory {
 
   void SetOutputInfo(const SinkInfo &info) {
     if (sink_) {
-      sink_->set_level(info.level);
-      sink_->set_pattern(info.pattern);
+      sink_->set_level(info.sink_level);
+      sink_->set_pattern(info.sink_pattern);
     }
   }
 
@@ -67,7 +76,7 @@ class ISinkFactory {
 class CBasicSinkFactory : public ISinkFactory {
  public:
   explicit CBasicSinkFactory(std::string filePath)
-      : filePath_{std::move(filePath)} {}
+      : filePath_(std::move(filePath)) {}
 
   bool CreateSink() override {
     try {
@@ -166,15 +175,15 @@ class CSinksManager {
   void createSink(const SinkInfo &info) {
     std::shared_ptr<ISinkFactory> sinkFactory;
 
-    switch (info.type) {
+    switch (info.sink_type) {
       case SinkType::SINK_TYPE_BASIC: {
-        sinkFactory = std::make_shared<CBasicSinkFactory>(info.path);
+        sinkFactory = std::make_shared<CBasicSinkFactory>(info.file_path);
       } break;
       case SinkType::SINK_TYPE_ROTATING: {
-        sinkFactory = std::make_shared<CRotatingSinkFactory>(info.path, info.rotate_size, info.rotate_count);
+        sinkFactory = std::make_shared<CRotatingSinkFactory>(info.file_path, info.rotate_size, info.rotate_count);
       } break;
       case SinkType::SINK_TYPE_DAILY: {
-        sinkFactory = std::make_shared<CDailySinkFactory>(info.path, 8, 0);
+        sinkFactory = std::make_shared<CDailySinkFactory>(info.file_path, 8, 0);
       } break;
       case SinkType::SINK_TYPE_STDOUT: {
         sinkFactory = std::make_shared<CStdoutColorSinkFactory>();

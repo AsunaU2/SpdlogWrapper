@@ -6,8 +6,14 @@ using namespace spdlogsink;
 
 int main() {
   SinkInfo sf;
-  sf.type = SinkType::SINK_TYPE_STDOUT;
-  CSinksManager::GetInstance().CreateSinks({sf});
+  std::string pattern = sf.sink_pattern;
+  sf.sink_type = SinkType::SINK_TYPE_STDOUT;
+  CSinksManager::GetInstance().CreateSinks({{SinkType::SINK_TYPE_STDOUT, "", spd_level::info, 1, 1024, pattern},
+                                            {SinkType::SINK_TYPE_BASIC, "./logs/basic_log.log", spd_level::info, 1, 1024, pattern},
+                                            {SinkType::SINK_TYPE_ROTATING, "./logs/rotate_log.log", spd_level::info, 1, 1024, pattern},
+                                            {SinkType::SINK_TYPE_DAILY, "./logs/day_log.log", spd_level::info, 1, 1024, pattern}
+
+  });
 
   std::shared_ptr<spdlog::logger> logger1 = std::make_shared<spdlog::logger>("multiple log", begin(CSinksManager::GetInstance().Sinks()), end(CSinksManager::GetInstance().Sinks()));
 
