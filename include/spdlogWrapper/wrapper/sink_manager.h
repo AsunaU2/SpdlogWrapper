@@ -24,10 +24,10 @@ using spd_level = spdlog::level::level_enum;
 
 enum class SinkType {
   SINK_TYPE_BASIC,
+  SINK_TYPE_ONCE_FILE,
   SINK_TYPE_ROTATING,
   SINK_TYPE_DAILY,
-  SINK_TYPE_STDOUT,
-  SINK_TYPE_ONCE_FILE
+  SINK_TYPE_STDOUT
 };
 
 struct SinkInfo {
@@ -92,6 +92,69 @@ class CBasicSinkFactory : public ISinkFactory {
   std::string filePath_;
 };
 
+class COnceFileSinkFactory : public  ISinkFactory{
+ public:
+  COnceFileSinkFactory() = default;
+
+  bool CreateSink() override {
+    bool ret = false;
+
+    do {
+      basicSinkFactory_ = std::make_shared<CBasicSinkFactory>(generateFilePath().append(".log"));
+      if (!basicSinkFactory_) {
+        break;
+      }
+
+      ret = basicSinkFactory_->CreateSink();
+    } while (false);
+
+    if (ret) {
+      sink_ = basicSinkFactory_->Sink();
+    }
+    return ret;
+  }
+
+ private:
+  static std::string generateFilePath() {
+    return GetCurrentTime();
+  }
+
+  static std::string GetCurrentTime() {
+    std::string strTime;
+    std::time_t now = std::time(nullptr);
+    std::tm p{};
+#ifdef _WIN32
+    localtime_s(&p, &now);
+#else
+    localtime_r(&now, &p);
+#endif  // _WIN32
+
+    std::string year = std::to_string(1900 + p.tm_year);
+    std::string month = std::to_string(1 + p.tm_mon);
+    std::string day = std::to_string(p.tm_mday);
+    std::string hour = std::to_string(p.tm_hour);
+    std::string minute = std::to_string(p.tm_min);
+    std::string second = std::to_string(p.tm_sec);
+
+    strTime.append(year);
+    strTime.append("-");
+    strTime.append(month);
+    strTime.append("-");
+    strTime.append(day);
+    strTime.append("-");
+    strTime.append(hour);
+    strTime.append("-");
+    strTime.append(minute);
+    strTime.append("-");
+    strTime.append(second);
+
+    return strTime;
+  }
+
+ private:
+  std::shared_ptr<CBasicSinkFactory> basicSinkFactory_;
+};
+
 class CRotatingSinkFactory : public ISinkFactory {
  public:
   CRotatingSinkFactory(std::string filePath, std::size_t singleFileSize, std::size_t rotatingCounts)
@@ -153,45 +216,13 @@ class CStdoutColorSinkFactory : public ISinkFactory {
   }
 };
 
-std::string GetCurrentTime() {
-  std::string strTime;
-  std::time_t now = std::time(nullptr);
-  std::tm p{};
-#ifdef _WIN32
-  localtime_s(&p, &now);
-#else
-  localtime_r(&now, &p);
-#endif  // _WIN32
-
-  std::string year = std::to_string(1900 + p.tm_year);
-  std::string month = std::to_string(1 + p.tm_mon);
-  std::string day = std::to_string(p.tm_mday);
-  std::string hour = std::to_string(p.tm_hour);
-  std::string minute = std::to_string(p.tm_min);
-  std::string second = std::to_string(p.tm_sec);
-
-  strTime.append(year);
-  strTime.append("-");
-  strTime.append(month);
-  strTime.append("-");
-  strTime.append(day);
-  strTime.append("-");
-  strTime.append(hour);
-  strTime.append("-");
-  strTime.append(minute);
-  strTime.append("-");
-  strTime.append(second);
-
-  return strTime;
-}
-
 class CSinksManager {
  public:
   CSinksManager(const CSinksManager &) = delete;
   CSinksManager &operator=(const CSinksManager &) = delete;
 
   static CSinksManager &GetInstance() {
-    static CSinksManager inst;
+    static CSinksManager inst{};
     return inst;
   }
 
@@ -221,6 +252,7 @@ class CSinksManager {
         sinkFactory = std::make_shared<CStdoutColorSinkFactory>();
       } break;
       case SinkType::SINK_TYPE_ONCE_FILE: {
+        sinkFactory = std::make_shared<COnceFileSinkFactory>();
       } break;
       default:
         break;

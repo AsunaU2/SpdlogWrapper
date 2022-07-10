@@ -5,15 +5,14 @@
 using namespace spdlogsink;
 
 int main() {
-  auto s = GetCurrentTime();
-
   SinkInfo sf;
   std::string pattern = sf.sink_pattern;
   sf.sink_type = SinkType::SINK_TYPE_STDOUT;
   CSinksManager::GetInstance().CreateSinks({{SinkType::SINK_TYPE_STDOUT, "", spd_level::info, 1, 1024, pattern},
                                             {SinkType::SINK_TYPE_BASIC, "./logs/basic_log.log", spd_level::info, 1, 1024, pattern},
                                             {SinkType::SINK_TYPE_ROTATING, "./logs/rotate_log.log", spd_level::info, 1, 1024, pattern},
-                                            {SinkType::SINK_TYPE_DAILY, "./logs/day_log.log", spd_level::info, 1, 1024, pattern}
+                                            {SinkType::SINK_TYPE_DAILY, "./logs/day_log.log", spd_level::info, 1, 1024, pattern},
+                                            {SinkType::SINK_TYPE_ONCE_FILE, "./logs/day_log.log", spd_level::info, 1, 1024, pattern}
 
   });
 
