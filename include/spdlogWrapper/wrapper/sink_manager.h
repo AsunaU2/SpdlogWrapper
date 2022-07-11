@@ -92,15 +92,16 @@ class CBasicSinkFactory : public ISinkFactory {
   std::string filePath_;
 };
 
-class COnceFileSinkFactory : public  ISinkFactory{
+class COnceFileSinkFactory : public ISinkFactory {
  public:
-  COnceFileSinkFactory() = default;
+  explicit COnceFileSinkFactory(std::string preFilePath)
+      : preFilePath_(std::move(preFilePath)) {}
 
   bool CreateSink() override {
     bool ret = false;
 
     do {
-      basicSinkFactory_ = std::make_shared<CBasicSinkFactory>(generateFilePath().append(".log"));
+      basicSinkFactory_ = std::make_shared<CBasicSinkFactory>(preFilePath_.append("/").append(generateFilePath()).append(".log"));
       if (!basicSinkFactory_) {
         break;
       }
@@ -115,9 +116,7 @@ class COnceFileSinkFactory : public  ISinkFactory{
   }
 
  private:
-  static std::string generateFilePath() {
-    return GetCurrentTime();
-  }
+  static std::string generateFilePath() { return GetCurrentTime(); }
 
   static std::string GetCurrentTime() {
     std::string strTime;
@@ -153,6 +152,7 @@ class COnceFileSinkFactory : public  ISinkFactory{
 
  private:
   std::shared_ptr<CBasicSinkFactory> basicSinkFactory_;
+  std::string preFilePath_;
 };
 
 class CRotatingSinkFactory : public ISinkFactory {
@@ -252,7 +252,7 @@ class CSinksManager {
         sinkFactory = std::make_shared<CStdoutColorSinkFactory>();
       } break;
       case SinkType::SINK_TYPE_ONCE_FILE: {
-        sinkFactory = std::make_shared<COnceFileSinkFactory>();
+        sinkFactory = std::make_shared<COnceFileSinkFactory>(info.file_path);
       } break;
       default:
         break;

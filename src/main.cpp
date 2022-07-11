@@ -12,7 +12,7 @@ int main() {
                                             {SinkType::SINK_TYPE_BASIC, "./logs/basic_log.log", spd_level::info, 1, 1024, pattern},
                                             {SinkType::SINK_TYPE_ROTATING, "./logs/rotate_log.log", spd_level::info, 1, 1024, pattern},
                                             {SinkType::SINK_TYPE_DAILY, "./logs/day_log.log", spd_level::info, 1, 1024, pattern},
-                                            {SinkType::SINK_TYPE_ONCE_FILE, "./logs/day_log.log", spd_level::info, 1, 1024, pattern}
+                                            {SinkType::SINK_TYPE_ONCE_FILE, "./logs/day_log", spd_level::info, 1, 1024, pattern}
 
   });
 
