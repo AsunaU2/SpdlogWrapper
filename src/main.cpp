@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "logger_manager.h"
 #include "sink_manager.h"
 
 using namespace spdlogsink;
@@ -15,11 +16,12 @@ int main() {
 
       });
 
-  std::shared_ptr<spdlog::logger> logger1 = std::make_shared<spdlog::logger>("multiple log", begin(CSinksManager::GetInstance().Sinks()), end(CSinksManager::GetInstance().Sinks()));
+  if (CLoggerManager::GetInstance().CreateLogger(CSinksManager::GetInstance().Sinks())) {
+    CLoggerManager::GetInstance().Logger()->debug("debug");
+    CLoggerManager::GetInstance().Logger()->info("info");
+    CLoggerManager::GetInstance().Logger()->error("error");
+  }
 
-  logger1->set_level(spdlog::level::trace);
-  logger1->debug("xixixixi");
-  logger1->info("xixixixi");
   std::cout << "Hello, World2!" << std::endl;
   return 0;
 }

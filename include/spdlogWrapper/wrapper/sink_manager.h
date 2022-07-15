@@ -218,8 +218,11 @@ class CStdoutColorSinkFactory : public ISinkFactory {
 
 class CSinksManager {
  public:
+  ~CSinksManager() = default;
   CSinksManager(const CSinksManager &) = delete;
   CSinksManager &operator=(const CSinksManager &) = delete;
+  CSinksManager(CSinksManager &&) noexcept = delete;
+  CSinksManager &operator=(CSinksManager &&) noexcept = delete;
 
   static CSinksManager &GetInstance() {
     static CSinksManager inst{};
