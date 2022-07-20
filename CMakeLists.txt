@@ -11,4 +11,4 @@ include_directories(
         include/spdlogWrapper/spdlog/
 )
 
-add_executable(spdlogWrapper include/spdlogWrapper/wrapper/spdlog-api.h include/spdlogWrapper/wrapper/sink_manager.h src/main.cpp include/spdlogWrapper/wrapper/logger_manager.h)
+add_executable(spdlogWrapper include/spdlogWrapper/wrapper/spdlog-api.h include/spdlogWrapper/wrapper/sink_manager.h src/main.cpp include/spdlogWrapper/wrapper/logger_manager.h include/spdlogWrapper/wrapper/spdlog_manager.h)
