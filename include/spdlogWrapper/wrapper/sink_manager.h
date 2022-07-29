@@ -9,20 +9,18 @@
 #include <iostream>
 #include <utility>
 
-//#include "../spdlog/async.h"
 #include "../spdlog/common.h"
 #include "../spdlog/sinks/basic_file_sink.h"
 #include "../spdlog/sinks/daily_file_sink.h"
 #include "../spdlog/sinks/rotating_file_sink.h"
 #include "../spdlog/sinks/stdout_color_sinks.h"
-//#include "../spdlog/spdlog.h"
 
 namespace spdlogsink {
 
 using spd_level = spdlog::level::level_enum;
 
 enum class SinkType {
-  SINK_TYPE_BASIC,
+  SINK_TYPE_BASIC = 0,
   SINK_TYPE_ONCE_FILE,
   SINK_TYPE_ROTATING,
   SINK_TYPE_DAILY,
