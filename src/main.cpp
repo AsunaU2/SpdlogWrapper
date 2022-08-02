@@ -37,17 +37,18 @@ int main() {
   SinkInfo sf;
   std::string pattern = sf.sink_pattern;
   sf.sink_type = SinkType::SINK_TYPE_STDOUT;
-  CSinksManager::GetInstance().CreateSinks(
+  auto sinksManager = std::make_unique<CSinksManager>();
+  sinksManager->CreateSinks(
       {SinkInfo{SinkType::SINK_TYPE_STDOUT, "", spd_level::info, 1, 1024, pattern}, SinkInfo{SinkType::SINK_TYPE_BASIC, "./logs/basic_log.log", spd_level::info, 1, 1024, pattern},
        SinkInfo{SinkType::SINK_TYPE_ROTATING, "./logs/rotate_log.log", spd_level::info, 1, 1024, pattern}, SinkInfo{SinkType::SINK_TYPE_DAILY, "./logs/day_log.log", spd_level::info, 1, 1024, pattern},
-       SinkInfo{SinkType::SINK_TYPE_ONCE_FILE, "./logs/once.log", spd_level::info, 1, 1024, pattern}
+       SinkInfo{SinkType::SINK_TYPE_ONCE_FILE, "./logs/once.log", spd_level::info, 1, 1024, pattern}});
 
-      });
+  auto loggerManager = std::make_unique<CLoggerManager>();
 
-  if (CLoggerManager::GetInstance().CreateLogger(CSinksManager::GetInstance().Sinks())) {
-    CLoggerManager::GetInstance().Logger()->debug("debug");
-    CLoggerManager::GetInstance().Logger()->info("info");
-    CLoggerManager::GetInstance().Logger()->error("error");
+  if (loggerManager->CreateLogger(sinksManager->Sinks())) {
+    loggerManager->Logger()->debug("debug");
+    loggerManager->Logger()->info("info");
+    loggerManager->Logger()->error("error");
   }
 
   std::cout << "Hello, World2!" << std::endl;

@@ -215,16 +215,12 @@ class CStdoutColorSinkFactory : public ISinkFactory {
 
 class CSinksManager {
  public:
+  CSinksManager() = default;
   ~CSinksManager() = default;
   CSinksManager(const CSinksManager &) = delete;
   CSinksManager &operator=(const CSinksManager &) = delete;
   CSinksManager(CSinksManager &&) noexcept = delete;
   CSinksManager &operator=(CSinksManager &&) noexcept = delete;
-
-  static CSinksManager &GetInstance() {
-    static CSinksManager inst{};
-    return inst;
-  }
 
   void CreateSinks(std::initializer_list<SinkInfo> infoList) {
     for (const auto &it : infoList) {
@@ -263,9 +259,6 @@ class CSinksManager {
       sinks_.emplace_back(sinkFactory->Sink());
     }
   }
-
- private:
-  CSinksManager() = default;
 
  private:
   std::vector<spdlog::sink_ptr> sinks_;

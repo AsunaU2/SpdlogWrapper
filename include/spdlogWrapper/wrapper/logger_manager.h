@@ -10,16 +10,12 @@
 
 class CLoggerManager {
  public:
+  CLoggerManager() = default;
   ~CLoggerManager() = default;
   CLoggerManager(const CLoggerManager &) = delete;
   CLoggerManager &operator=(const CLoggerManager &) = delete;
   CLoggerManager(CLoggerManager &&) noexcept = delete;
   CLoggerManager &operator=(CLoggerManager &&) noexcept = delete;
-
-  static CLoggerManager &GetInstance() {
-    static CLoggerManager inst{};
-    return inst;
-  }
 
   bool CreateLogger(const std::vector<spdlog::sink_ptr> &sinks) {
     bool ret = false;
@@ -38,9 +34,6 @@ class CLoggerManager {
   }
 
   std::shared_ptr<spdlog::logger> Logger() { return logger_; }
-
- private:
-  CLoggerManager() = default;
 
  private:
   std::shared_ptr<spdlog::logger> logger_;
