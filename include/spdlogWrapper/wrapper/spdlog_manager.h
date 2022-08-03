@@ -122,22 +122,33 @@ class CJsonConfigTransfer : public IConfigTransfer {
 
 class CSpdlogManager {
  public:
-  explicit CSpdlogManager(std::string configFilePath = "")
-      : configFilePath_(std::move(configFilePath)) {}
+  static CSpdlogManager &GetInstance() {
+    static CSpdlogManager inst;
+    return inst;
+  }
+
+  virtual ~CSpdlogManager() = default;
+  CSpdlogManager(const CSpdlogManager &) = delete;
+  CSpdlogManager &operator=(const CSpdlogManager &) = delete;
+  CSpdlogManager(CSpdlogManager &&) = delete;
+  CSpdlogManager &operator=(CSpdlogManager &&) = delete;
+
+ private:
+  CSpdlogManager() = default;
 
  public:
-  void Initialize() {
+  void Initialize(std::string configFilePath = "") {
     static std::once_flag once;
-    std::call_once(once, &CSpdlogManager::initialize, this);
+    std::call_once(once, &CSpdlogManager::initialize, this, std::move(configFilePath));
   }
 
  private:
-  bool initialize() {
+  bool initialize(const std::string &configFilePath) {
     bool ret = false;
     std::vector<spdlogsink::SinkInfo> sinkInfos;
 
-    if (!configFilePath_.empty()) {
-      configTransfer_ = std::make_unique<CJsonConfigTransfer>(configFilePath_);
+    if (!configFilePath.empty()) {
+      configTransfer_ = std::make_unique<CJsonConfigTransfer>(configFilePath);
       auto transferResult = configTransfer_->TransferConfig();
       if (transferResult.first) {
         sinkInfos.swap(transferResult.second);
@@ -159,7 +170,6 @@ class CSpdlogManager {
   }
 
  private:
-  std::string configFilePath_;
   std::unique_ptr<IConfigTransfer> configTransfer_;
   std::unique_ptr<spdlogsink::CSinksManager> sinkManager_;
   std::unique_ptr<CLoggerManager> loggerManager_;
