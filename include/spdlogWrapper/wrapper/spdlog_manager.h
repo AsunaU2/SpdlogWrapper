@@ -30,84 +30,87 @@ class CJsonConfigTransfer : public IConfigTransfer {
 
  public:
   std::pair<bool, std::vector<spdlogsink::SinkInfo>> TransferConfig() override {
-    bool ret = false;
+    bool ret = true;
     std::vector<spdlogsink::SinkInfo> sinkInfos;
 
     try {
       std::ifstream ifs{configFilePath_};
       auto data = nlohmann::json::parse(ifs);
-      if (data.contains("config")) {
-        spdlogsink::SinkInfo skInfo;
 
-        for (const auto &config : data["config"]) {
-          if (!config.contains("enable") || !config["enable"]) {
-            continue;
-          }
+      if (!data.contains("config")) {
+        throw;
+      }
 
-          // Parse Sink type
-          if (config.contains("sinkType")) {
-            const std::string sinkType = config["sinkType"];
-            if (sinkType == "basic") {
-              skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_BASIC;
-            } else if (sinkType == "once_file") {
-              skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ONCE_FILE;
-            } else if (sinkType == "daily") {
-              skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_DAILY;
-            } else if (sinkType == "rotating") {
-              skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ROTATING;
-            } else if (sinkType == "stdout") {
-              skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_STDOUT;
-            } else {
-              ret = false;
-            }
-          }
+      spdlogsink::SinkInfo skInfo;
 
-          // Parse Log path
-          if (config.contains("logPath")) {
-            skInfo.file_path = config["logPath"];
-          }
+      for (const auto &config : data["config"]) {
+        if (!config.contains("enable") || !config["enable"]) {
+          continue;
+        }
 
-          // Parse sinkLevel
-          if (config.contains("sinkLevel")) {
-            const std::string sinkLevel = config["sinkLevel"];
-            if (sinkLevel == "trace") {
-              skInfo.sink_level = spdlogsink::spd_level::trace;
-            } else if (sinkLevel == "debug") {
-              skInfo.sink_level = spdlogsink::spd_level::debug;
-            } else if (sinkLevel == "info") {
-              skInfo.sink_level = spdlogsink::spd_level::info;
-            } else if (sinkLevel == "warning") {
-              skInfo.sink_level = spdlogsink::spd_level::warn;
-            } else if (sinkLevel == "error") {
-              skInfo.sink_level = spdlogsink::spd_level::err;
-            } else if (sinkLevel == "critical") {
-              skInfo.sink_level = spdlogsink::spd_level::critical;
-            } else {
-              ret = false;
-            }
-          }
-
-          // Parse rotateCount
-          if (config.contains("rotateCount")) {
-            skInfo.rotate_count = config["rotateCount"];
-          }
-
-          // Parse rotateSize
-          if (config.contains("rotateSize")) {
-            skInfo.rotate_size = config["rotateSize"];
-          }
-
-          // Parse Pattern
-          if (config.contains("pattern")) {
-            skInfo.sink_pattern = config["pattern"];
+        // Parse Sink type
+        if (config.contains("sinkType")) {
+          const std::string sinkType = config["sinkType"];
+          if (sinkType == "basic") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_BASIC;
+          } else if (sinkType == "once_file") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ONCE_FILE;
+          } else if (sinkType == "daily") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_DAILY;
+          } else if (sinkType == "rotating") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ROTATING;
+          } else if (sinkType == "stdout") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_STDOUT;
+          } else {
+            ret = false;
           }
         }
 
-        sinkInfos.emplace_back(skInfo);
+        // Parse Log path
+        if (config.contains("logPath")) {
+          skInfo.file_path = config["logPath"];
+        }
+
+        // Parse sinkLevel
+        if (config.contains("sinkLevel")) {
+          const std::string sinkLevel = config["sinkLevel"];
+          if (sinkLevel == "trace") {
+            skInfo.sink_level = spdlogsink::spd_level::trace;
+          } else if (sinkLevel == "debug") {
+            skInfo.sink_level = spdlogsink::spd_level::debug;
+          } else if (sinkLevel == "info") {
+            skInfo.sink_level = spdlogsink::spd_level::info;
+          } else if (sinkLevel == "warning") {
+            skInfo.sink_level = spdlogsink::spd_level::warn;
+          } else if (sinkLevel == "error") {
+            skInfo.sink_level = spdlogsink::spd_level::err;
+          } else if (sinkLevel == "critical") {
+            skInfo.sink_level = spdlogsink::spd_level::critical;
+          } else {
+            ret = false;
+          }
+        }
+
+        // Parse rotateCount
+        if (config.contains("rotateCount")) {
+          skInfo.rotate_count = config["rotateCount"];
+        }
+
+        // Parse rotateSize
+        if (config.contains("rotateSize")) {
+          skInfo.rotate_size = config["rotateSize"];
+        }
+
+        // Parse Pattern
+        if (config.contains("pattern")) {
+          skInfo.sink_pattern = config["pattern"];
+        }
       }
 
+      sinkInfos.emplace_back(skInfo);
+
     } catch (...) {
-      ret = false;
+      throw;
     }
 
     return {ret, sinkInfos};
@@ -123,18 +126,37 @@ class CSpdlogManager {
       : configFilePath_(std::move(configFilePath)) {}
 
  public:
-  bool Initialize() {
+  void Initialize() {
     static std::once_flag once;
-    bool ret = false;
-    std::call_once(once, [this] { return false; });
-
-    return ret;
+    std::call_once(once, &CSpdlogManager::initialize, this);
   }
 
  private:
-  bool initialize() {}
+  bool initialize() {
+    bool ret = false;
+    std::vector<spdlogsink::SinkInfo> sinkInfos;
 
-  bool initializeWithConfig() {}
+    if (!configFilePath_.empty()) {
+      configTransfer_ = std::make_unique<CJsonConfigTransfer>(configFilePath_);
+      auto transferResult = configTransfer_->TransferConfig();
+      if (transferResult.first) {
+        sinkInfos.swap(transferResult.second);
+      } else {
+        return false;
+      }
+    } else {
+      spdlogsink::SinkInfo info;
+      sinkInfos.emplace_back(info);
+    }
+
+    sinkManager_ = std::make_unique<spdlogsink::CSinksManager>();
+    sinkManager_->CreateSinks(sinkInfos);
+
+    loggerManager_ = std::make_unique<CLoggerManager>();
+    ret = loggerManager_->CreateLogger(sinkManager_->Sinks());
+
+    return ret;
+  }
 
  private:
   std::string configFilePath_;

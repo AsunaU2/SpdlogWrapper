@@ -223,8 +223,14 @@ class CSinksManager {
   CSinksManager &operator=(CSinksManager &&) noexcept = delete;
 
   void CreateSinks(std::initializer_list<SinkInfo> infoList) {
-    for (const auto &it : infoList) {
-      createSink(it);
+    for (const auto &info : infoList) {
+      createSink(info);
+    }
+  }
+
+  void CreateSinks(const std::vector<SinkInfo> &infoList) {
+    for (const auto &info : infoList) {
+      createSink(info);
     }
   }
 
