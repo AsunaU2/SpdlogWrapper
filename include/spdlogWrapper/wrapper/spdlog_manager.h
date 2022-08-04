@@ -44,7 +44,7 @@ class CJsonConfigTransfer : public IConfigTransfer {
       spdlogsink::SinkInfo skInfo;
 
       for (const auto &config : data["config"]) {
-        if (!config.contains("enable") || !config["enable"]) {
+        if (!config.contains("enabled") || !config["enabled"]) {
           continue;
         }
 
@@ -137,9 +137,22 @@ class CSpdlogManager {
   CSpdlogManager() = default;
 
  public:
-  void Initialize(std::string configFilePath = "") {
-    static std::once_flag once;
-    std::call_once(once, &CSpdlogManager::initialize, this, std::move(configFilePath));
+  void Initialize(const std::string &configFilePath = "") {
+    //    std::call_once(once, &CSpdlogManager::initialize, this, configFilePath);
+    initialize(configFilePath);
+    int a = 0;
+  }
+
+  template <typename... Args>
+  void LogPrint(spdlogsink::spd_level level, const std::string &fmt, const Args &...args) {
+    try {
+      if (loggerManager_) {
+        loggerManager_->Logger()->log(level, fmt, args...);
+        loggerManager_->Logger()->flush();
+      }
+    } catch (const std::exception &e) {
+      std::cerr << e.what() << '\n';
+    }
   }
 
  private:
@@ -170,6 +183,8 @@ class CSpdlogManager {
   }
 
  private:
+  std::once_flag once;
+
   std::unique_ptr<IConfigTransfer> configTransfer_;
   std::unique_ptr<spdlogsink::CSinksManager> sinkManager_;
   std::unique_ptr<CLoggerManager> loggerManager_;
