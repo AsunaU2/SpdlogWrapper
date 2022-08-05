@@ -10,7 +10,7 @@ using namespace spdlogsink;
 int main() {
   __LOG_INIT__("./config/config.json");
 
-  LOGI("YOYOYO {}", 4);
+  for (int i = 0; i < 1024; ++i) LOGE("YOYOY2O {}", 4);
 
   std::cout << "Hello, World2!" << std::endl;
   return 0;
