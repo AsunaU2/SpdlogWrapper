@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include "../nlohmannJson/json.hpp"
+#include "../spdlog/spdlog.h"
 #include "sink_manager.h"
 
 class IConfigTransfer {
@@ -127,7 +128,7 @@ class CSpdlogManager {
     return inst;
   }
 
-  virtual ~CSpdlogManager() = default;
+  virtual ~CSpdlogManager() { spdlog::drop_all; }
   CSpdlogManager(const CSpdlogManager &) = delete;
   CSpdlogManager &operator=(const CSpdlogManager &) = delete;
   CSpdlogManager(CSpdlogManager &&) = delete;
