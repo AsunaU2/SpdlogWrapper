@@ -29,7 +29,7 @@ enum class SinkType {
 
 struct SinkInfo {
   explicit SinkInfo(SinkType type = SinkType::SINK_TYPE_ONCE_FILE, std::string path = "./logs/log.log", spd_level level = spdlog::level::info, std::size_t rotateCount = 1,
-                    std::size_t rotateSize = 1024 * 1024 * 1, std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l [PID:%t] %v")
+                    std::size_t rotateSize = 1024 * 1024 * 1, std::string pattern = "%Y-%m-%d %H:%M:%S.%e %l PID:%t %v")
       : sink_type(type)
       , file_path(std::move(path))
       , sink_level(level)

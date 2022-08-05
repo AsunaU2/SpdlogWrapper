@@ -1,0 +1,29 @@
+{
+  "comment":{
+    "enabled":"'true' - 生效; 'false' - 失效",
+    "sinkType":{
+      "description":"日志类型, 包括如下几种",
+      "values:":{
+        "basic":"日志会不断写到同一个文件中",
+        "once_file":"每次运行软件会单独生成一个新的日志文件",
+        "daily":"每天早上8点会生成一个新的日志文件",
+        "rotating":"根据配置进行滚动的日志",
+        "stdout":"控制台输出日志内容"
+      }
+    },
+    "sinkLevel":{
+      "description":"日志记录级别",
+      "values":"trace, debug, info, warning, error, critical"
+    }
+  },
+  "config":[
+    {
+      "enabled":true,
+      "sinkType":"stdout",
+      "logPath":"./logs/newlog",
+      "sinkLevel":"info",
+      "rotateCount":1,
+      "rotateSize":5242880
+    }
+  ]
+}
