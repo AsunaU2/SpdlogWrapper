@@ -55,14 +55,15 @@ class CJsonConfigTransfer : public IConfigTransfer {
             skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_BASIC;
           } else if (sinkType == "once_file") {
             skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ONCE_FILE;
-          } else if (sinkType == "daily") {
-            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_DAILY;
           } else if (sinkType == "rotating") {
             skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_ROTATING;
+          } else if (sinkType == "daily") {
+            skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_DAILY;
           } else if (sinkType == "stdout") {
             skInfo.sink_type = spdlogsink::SinkType::SINK_TYPE_STDOUT;
           } else {
             ret = false;
+            continue;
           }
         }
 
@@ -88,6 +89,7 @@ class CJsonConfigTransfer : public IConfigTransfer {
             skInfo.sink_level = spdlogsink::spd_level::critical;
           } else {
             ret = false;
+            continue;
           }
         }
 
@@ -105,10 +107,8 @@ class CJsonConfigTransfer : public IConfigTransfer {
         if (config.contains("pattern")) {
           skInfo.sink_pattern = config["pattern"];
         }
+        sinkInfos.emplace_back(skInfo);
       }
-
-      sinkInfos.emplace_back(skInfo);
-
     } catch (...) {
       throw;
     }
