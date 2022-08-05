@@ -148,7 +148,6 @@ class CSpdlogManager {
     try {
       if (loggerManager_) {
         loggerManager_->Logger()->log(level, fmt, args...);
-        loggerManager_->Logger()->flush();
       }
     } catch (const std::exception &e) {
       std::cerr << e.what() << '\n';
