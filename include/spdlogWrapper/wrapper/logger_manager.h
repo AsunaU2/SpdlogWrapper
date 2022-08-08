@@ -17,23 +17,22 @@ class CLoggerManager {
   CLoggerManager(CLoggerManager &&) noexcept = delete;
   CLoggerManager &operator=(CLoggerManager &&) noexcept = delete;
 
-  bool CreateLogger(const std::vector<spdlog::sink_ptr> &sinks) {
-    bool ret = false;
-
+  void CreateLogger(const std::vector<spdlog::sink_ptr> &sinks) {
     try {
       if (!sinks.empty()) {
         logger_ = std::make_shared<spdlog::logger>("Logger", sinks.begin(), sinks.end());
         logger_->set_level(spdlog::level::trace);
         logger_->flush_on(spdlog::level::trace);
-        ret = true;
       }
     } catch (const spdlog::spdlog_ex &ex) {
       std::cerr << ex.what() << std::endl;
+      throw;
     }
-    return ret;
   }
 
-  std::shared_ptr<spdlog::logger> Logger() { return logger_; }
+  std::shared_ptr<spdlog::logger> Logger() {
+    return logger_;
+  }
 
  private:
   std::shared_ptr<spdlog::logger> logger_;

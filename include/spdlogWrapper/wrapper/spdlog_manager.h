@@ -142,7 +142,12 @@ class CSpdlogManager {
 
  public:
   void Initialize(const std::string &configFilePath = "") {
-    std::call_once(once_, &CSpdlogManager::initialize, this, configFilePath);
+    try {
+      std::call_once(once_, &CSpdlogManager::initialize, this, configFilePath);
+    } catch (...) {
+      std::cerr << "Spdlog manager initialize failed! \n";
+      throw;
+    }
   }
 
   template <typename... Args>
@@ -157,8 +162,7 @@ class CSpdlogManager {
   }
 
  private:
-  bool initialize(const std::string &configFilePath) {
-    bool ret = false;
+  void initialize(const std::string &configFilePath) {
     std::vector<spdlogsink::SinkInfo> sinkInfos;
 
     if (!configFilePath.empty()) {
@@ -167,20 +171,27 @@ class CSpdlogManager {
       if (transferResult.first) {
         sinkInfos.swap(transferResult.second);
       } else {
-        return false;
+        std::cerr << "Profile conversion failed \n";
+        throw;
       }
     } else {
       spdlogsink::SinkInfo info;
       sinkInfos.emplace_back(info);
     }
 
-    sinkManager_ = std::make_unique<spdlogsink::CSinksManager>();
-    sinkManager_->CreateSinks(sinkInfos);
+    try {
+      sinkManager_ = std::make_unique<spdlogsink::CSinksManager>();
+      sinkManager_->CreateSinks(sinkInfos);
+    } catch (...) {
+      throw;
+    }
 
-    loggerManager_ = std::make_unique<CLoggerManager>();
-    ret = loggerManager_->CreateLogger(sinkManager_->Sinks());
-
-    return ret;
+    try {
+      loggerManager_ = std::make_unique<CLoggerManager>();
+      loggerManager_->CreateLogger(sinkManager_->Sinks());
+    } catch (...) {
+      throw;
+    }
   }
 
  private:
