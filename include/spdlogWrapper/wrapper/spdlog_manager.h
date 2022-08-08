@@ -128,7 +128,7 @@ class CSpdlogManager {
     return inst;
   }
 
-  virtual ~CSpdlogManager() { spdlog::drop_all; }
+  virtual ~CSpdlogManager() { spdlog::drop_all(); }
   CSpdlogManager(const CSpdlogManager &) = delete;
   CSpdlogManager &operator=(const CSpdlogManager &) = delete;
   CSpdlogManager(CSpdlogManager &&) = delete;
