@@ -57,7 +57,9 @@ class ISinkFactory {
 
   virtual bool CreateSink() = 0;
 
-  spdlog::sink_ptr Sink() { return sink_; }
+  spdlog::sink_ptr Sink() {
+    return sink_;
+  }
 
   void SetOutputInfo(const SinkInfo &info) {
     if (sink_) {
@@ -113,7 +115,9 @@ class COnceFileSinkFactory : public ISinkFactory {
   }
 
  private:
-  static std::string generateFilePath() { return GetCurrentTime(); }
+  static std::string generateFilePath() {
+    return GetCurrentTime();
+  }
 
   static std::string GetCurrentTime() {
     std::string strTime;
@@ -234,7 +238,9 @@ class CSinksManager {
     }
   }
 
-  const std::vector<spdlog::sink_ptr> &Sinks() const { return sinks_; }
+  const std::vector<spdlog::sink_ptr> &Sinks() const {
+    return sinks_;
+  }
 
  private:
   void createSink(const SinkInfo &info) {

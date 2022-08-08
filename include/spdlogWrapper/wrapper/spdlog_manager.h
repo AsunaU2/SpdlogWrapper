@@ -128,7 +128,10 @@ class CSpdlogManager {
     return inst;
   }
 
-  virtual ~CSpdlogManager() { spdlog::drop_all(); }
+  ~CSpdlogManager() {
+    spdlog::drop_all();
+  }
+
   CSpdlogManager(const CSpdlogManager &) = delete;
   CSpdlogManager &operator=(const CSpdlogManager &) = delete;
   CSpdlogManager(CSpdlogManager &&) = delete;
@@ -139,9 +142,7 @@ class CSpdlogManager {
 
  public:
   void Initialize(const std::string &configFilePath = "") {
-    //    std::call_once(once, &CSpdlogManager::initialize, this, configFilePath);
-    initialize(configFilePath);
-    int a = 0;
+    std::call_once(once_, &CSpdlogManager::initialize, this, configFilePath);
   }
 
   template <typename... Args>
@@ -183,7 +184,7 @@ class CSpdlogManager {
   }
 
  private:
-  std::once_flag once;
+  std::once_flag once_;
 
   std::unique_ptr<IConfigTransfer> configTransfer_;
   std::unique_ptr<spdlogsink::CSinksManager> sinkManager_;
