@@ -8,7 +8,7 @@
 using namespace spdlogsink;
 
 int main() {
-  LOG_INIT__();
+  LOG_INIT_("");
 
   for (int i = 0; i < 1024; ++i) LOGE("YOYOY2O {}", 4);
 
