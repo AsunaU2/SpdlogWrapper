@@ -3,12 +3,12 @@
 #include "logger_manager.h"
 #include "sink_manager.h"
 #include "spdlog_manager.h"
-#include "wrapper_api.h"
+#include "spdlog_wrapper_api.h"
 
 using namespace spdlogsink;
 
 int main() {
-  __LOG_INIT__("./config/config.json");
+  LOG_INIT__();
 
   for (int i = 0; i < 1024; ++i) LOGE("YOYOY2O {}", 4);
 
