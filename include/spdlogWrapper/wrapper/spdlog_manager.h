@@ -11,6 +11,25 @@
 #include "../spdlog/spdlog.h"
 #include "sink_manager.h"
 
+namespace kiritou2 {
+// make_unique support for pre c++14
+
+#if __cplusplus >= 201402L // C++14 and beyond
+using std::enable_if_t;
+using std::make_unique;
+#else
+template<bool B, class T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+template<typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&... args)
+{
+  static_assert(!std::is_array<T>::value, "arrays not supported");
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+#endif
+}
+
 class IConfigTransfer {
  public:
   IConfigTransfer() = default;
@@ -166,7 +185,7 @@ class CSpdlogManager {
     std::vector<spdlogsink::SinkInfo> sinkInfos;
 
     if (!configFilePath.empty()) {
-      configTransfer_ = std::make_unique<CJsonConfigTransfer>(configFilePath);
+      configTransfer_ = kiritou2::make_unique<CJsonConfigTransfer>(configFilePath);
       auto transferResult = configTransfer_->TransferConfig();
       if (transferResult.first) {
         sinkInfos.swap(transferResult.second);
@@ -180,14 +199,14 @@ class CSpdlogManager {
     }
 
     try {
-      sinkManager_ = std::make_unique<spdlogsink::CSinksManager>();
+      sinkManager_ = kiritou2::make_unique<spdlogsink::CSinksManager>();
       sinkManager_->CreateSinks(sinkInfos);
     } catch (...) {
       throw;
     }
 
     try {
-      loggerManager_ = std::make_unique<CLoggerManager>();
+      loggerManager_ = kiritou2::make_unique<CLoggerManager>();
       loggerManager_->CreateLogger(sinkManager_->Sinks());
     } catch (...) {
       throw;
