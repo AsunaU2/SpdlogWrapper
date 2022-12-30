@@ -10,6 +10,7 @@
 #include "../nlohmannJson/json.hpp"
 #include "../spdlog/spdlog.h"
 #include "sink_manager.h"
+#include "logger_manager.h"
 
 namespace kiritou2 {
 // make_unique support for pre c++14
