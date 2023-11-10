@@ -18,12 +18,12 @@
 
 #define SPDLOGMANAGER_LOG_PRINT CSpdlogManager::GetInstance().LogPrint
 #if (defined(_WIN32) || defined(_WIN64))
-#define LOGT(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::trace, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOGD(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::debug, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOGI(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::info, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOGW(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::warn, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOGT(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::trace, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOGD(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::debug, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOGI(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::info, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOGW(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::warn, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
 #define LOGE(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::err, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
-#define LOGC(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::critical, "[{}:{}] {} " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define LOGC(fmt, ...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::critical, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, __VA_ARGS__)
 #else
 #define LOGT(fmt, args...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::trace, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, ##args)
 #define LOGD(fmt, args...) SPDLOGMANAGER_LOG_PRINT(spdlogsink::spd_level::debug, "[{}:{}] [{}] " fmt, FILENAME_, __LINE__, __FUNCTION__, ##args)
