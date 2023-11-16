@@ -7,29 +7,28 @@
 
 #include <fstream>
 
-#include "../nlohmannJson/json.hpp"
-#include "../spdlog/spdlog.h"
-#include "sink_manager.h"
 #include "logger_manager.h"
+#include "nlohmannJson/json.hpp"
+#include "sink_manager.h"
+#include "spdlog/spdlog.h"
 
 namespace kiritou2 {
 // make_unique support for pre c++14
 
-#if __cplusplus >= 201402L // C++14 and beyond
+#if __cplusplus >= 201402L  // C++14 and beyond
 using std::enable_if_t;
 using std::make_unique;
 #else
-template<bool B, class T = void>
+template <bool B, class T = void>
 using enable_if_t = typename std::enable_if<B, T>::type;
 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args &&... args)
-{
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&...args) {
   static_assert(!std::is_array<T>::value, "arrays not supported");
   return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 #endif
-}
+}  // namespace kiritou2
 
 class IConfigTransfer {
  public:

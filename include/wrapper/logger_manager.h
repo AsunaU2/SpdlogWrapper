@@ -5,8 +5,9 @@
 #ifndef SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_LOGGER_MANAGER_H_
 #define SPDLOGWRAPPER_INCLUDE_SPDLOGWRAPPER_WRAPPER_LOGGER_MANAGER_H_
 
-#include "../spdlog/logger.h"
-#include "sink_manager.h"
+#include <iostream>
+
+#include "spdlog/logger.h"
 
 class CLoggerManager {
  public:

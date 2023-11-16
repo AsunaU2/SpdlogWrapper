@@ -9,11 +9,11 @@
 #include <iostream>
 #include <utility>
 
-#include "../spdlog/common.h"
-#include "../spdlog/sinks/basic_file_sink.h"
-#include "../spdlog/sinks/daily_file_sink.h"
-#include "../spdlog/sinks/rotating_file_sink.h"
-#include "../spdlog/sinks/stdout_color_sinks.h"
+#include "spdlog/common.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/daily_file_sink.h"
+#include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 namespace spdlogsink {
 

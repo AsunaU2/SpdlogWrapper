@@ -1,9 +1,6 @@
 #include <iostream>
 
-#include "logger_manager.h"
-#include "sink_manager.h"
-#include "spdlog_manager.h"
-#include "spdlog_wrapper_api.h"
+#include "wrapper/spdlog_wrapper_api.h"
 
 using namespace spdlogsink;
 

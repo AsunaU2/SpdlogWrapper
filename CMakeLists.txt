@@ -1,22 +1,19 @@
-cmake_minimum_required(VERSION 3.21)
-project(spdlogWrapper)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_BUILD_TYPE Debug)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    set(CMAKE_CXX_FLAGS -pthread)
-endif()
+project(spdlogWrapper)
 
-include_directories(
-        include/
-        include/spdlogWrapper/
-        include/spdlogWrapper/wrapper/
-        include/spdlogWrapper/spdlog/
-)
-
-add_executable(spdlogWrapper
-        src/main.cpp)
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif ()
 
 find_package(Threads REQUIRED)
-target_link_libraries(spdlogWrapper PRIVATE Threads::Threads)
+
+add_executable(${PROJECT_NAME}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_THREAD_LIBS_INIT})
