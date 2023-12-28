@@ -2,8 +2,6 @@
 
 #include "wrapper/spdlog_wrapper_api.h"
 
-using namespace spdlogsink;
-
 int main() {
   LOG_INIT_("");
 
