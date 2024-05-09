@@ -184,7 +184,12 @@ class CSpdlogManager {
   void initialize(const std::string &configFilePath) {
     std::vector<spdlogsink::SinkInfo> sinkInfos;
 
-    if (!configFilePath.empty()) {
+    auto fileExists = [](const std::string &name) -> bool {
+      std::ifstream f(name.c_str());
+      return f.good();
+    };
+
+    if (!configFilePath.empty() && fileExists(configFilePath) ) {
       configTransfer_ = kiritou2::make_unique<CJsonConfigTransfer>(configFilePath);
       auto transferResult = configTransfer_->TransferConfig();
       if (transferResult.first) {
